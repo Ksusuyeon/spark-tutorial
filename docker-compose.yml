@@ -2,74 +2,102 @@ version: "3"
 
 services:
   spark-master:
-    image: apache/spark:v3.1.3
+    image: spark-base:latest
     container_name: spark-master
     hostname: spark-master
     restart: always
     ports:
-      # - "9870:9870"
+      - "7077:7077"
       - "8080:8080"
     environment:
       - SPARK_MODE=master
-      
-    # volumes:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_LOG=$SPARK_HOME/logs
+    volumes:
+      - ./logs/master:$SPARK_HOME/logs
+      - ./workspace:/tmp
+    entrypoint: ["/entrypoint.sh", "; tail -f /opt/spark-3.2.1-bin-hadoop3.2/logs/*"]
     networks:
       - bridge
 
   spark-worker01:
-    image: apache/spark:v3.1.3
+    image: spark-base:latest
     container_name: spark-worker01
     hostname: spark-worker01
     restart: always
     ports:
       - "8081:8081"
     depends_on:
-      - spark_master
+      - spark-master
     environment:
-      - SPARK_MODE=slave
-
-    # volumes:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_WORKER_LOG=$SPARK_HOME/logs
+    volumes:
+      - ./logs/worker:$SPARK_HOME/logs
     networks:
       - bridge
 
   spark-worker02:
-    image: apache/spark:v3.1.3
+    image: spark-base:latest
     container_name: spark-worker02
     hostname: spark-worker02
     restart: always
     ports:
       - "8082:8081"
     depends_on:
-      - spark_master
+      - spark-master
     environment:
-      - SPARK_MODE=slave
-
-    # volumes:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_WORKER_LOG=$SPARK_HOME/logs
+    volumes:
+      - ./logs/worker:$SPARK_HOME/logs
     networks:
       - bridge
   
-  zeppeline:
-    image: apache/zeppelin:0.8.2
-    container_name: zeppelin
-    hostname: zeppelin
-    restart: always
-    depends_on:
-      - spark-master
-      - spark-worker01
-      - spark-worker02
-    ports:
-      - "8888:8080"
-    environment:
-      - SPARK_MODE=zeppelin
+  # zeppeline:
+  #   image: apache/zeppelin:0.8.2
+  #   container_name: zeppelin
+  #   hostname: zeppelin
+  #   restart: always
+  #   depends_on:
+  #     - spark-master
+  #     - spark-worker01
+  #     - spark-worker02
+  #   ports:
+  #     - "8888:8080"
+  #   environment:
+  #     - SPARK_MODE=zeppelin
 
-    volumes:
-      - ./workspace:/workspace
-    networks:
-      - bridge
+  #   volumes:
+  #     - ./workspace:/workspace
+  #   networks:
+  #     - bridge
+
+  # jupyter-notebook:
+  #   image: jupyter/all-spark-notebook
+  #   container_name: jupyter
+  #   hostname: jupyter
+  #   restart: always
+  #   # depends_on:
+  #   #   - spark-master
+  #   #   - spark-worker01
+  #   #   - spark-worker02
+  #   ports:
+  #     - "8888:8888"
+  #   volumes:
+  #     - ./workspace:/home/jovyan/work
+  #   networks:
+  #     - bridge
 
 volumes:
-  spark:
+  logs:
     driver: local
+
 
 networks:
   bridge:

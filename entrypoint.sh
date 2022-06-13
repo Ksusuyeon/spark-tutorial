@@ -3,13 +3,15 @@ sleep 1
 
 # 스파크 마스터 실행
 if [ ${SPARK_MODE} == "master" ]; then
-    bash /home/spark/sbin/start-master.sh
+    # bash $SPARK_HOME/sbin/start-master.sh
+    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.master.Master >> logs/spark-master.out
 fi
 
 sleep 1
 # 스파크 슬레이브 실행
-if [ ${SPARK_MODE} == "slave" ]; then
-    bash /home/spark/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} -c ${SPARK_WORKER_CORES} -m ${SPARK_WORKER_MEMORY}
+if [ ${SPARK_MODE} == "worker" ]; then
+    # bash $SPARK_HOME/sbin/start-worker.sh spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} 
+    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.worker.Worker spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} >> logs/spark-worker.out
 fi
 
 sleep 1

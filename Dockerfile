@@ -52,3 +52,9 @@ ENV PATH $SPARK_HOME/sbin/:$PATH
 
 # ENV JAVA_HOME `echo $JAVA_HOME`
 # RUN $SPARK_HOME/build/mvn -DskipTests clean package
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod a+x /entrypoint.sh
+
+VOLUME $SPARK_HOME/logs
+
+ENTRYPOINT ["/entrypoint.sh"]
