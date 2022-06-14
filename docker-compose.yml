@@ -35,8 +35,12 @@ services:
       - SPARK_MASTER_HOST=spark-master
       - SPARK_MASTER_PORT=7077
       - SPARK_WORKER_LOG=$SPARK_HOME/logs
+      # - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=2048m
+      - SPARK_WORKER_DIR=/tmp
     volumes:
       - ./logs/worker:$SPARK_HOME/logs
+      - ./workspace:/tmp
     networks:
       - bridge
 
@@ -54,8 +58,12 @@ services:
       - SPARK_MASTER_HOST=spark-master
       - SPARK_MASTER_PORT=7077
       - SPARK_WORKER_LOG=$SPARK_HOME/logs
+      # - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=2048m
+      - SPARK_WORKER_DIR=/tmp
     volumes:
       - ./logs/worker:$SPARK_HOME/logs
+      - ./workspace:/tmp
     networks:
       - bridge
   
