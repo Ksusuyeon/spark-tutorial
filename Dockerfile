@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # apt 미러서버 미국(default) -> 한국 변경
-RUN sed -i 's@archive.ubuntu.com@kr.archive.ubuntu.com@g' /etc/apt/sources.list
+# RUN sed -i 's@archive.ubuntu.com@kr.archive.ubuntu.com@g' /etc/apt/sources.list
 
 # 자주 사용하는 패키지 설치
 RUN apt-get clean && \
@@ -22,7 +22,7 @@ ENV ZEPPELIN_VERSION 0.10.1
 RUN apt-get install openjdk-8-jdk -y
 
 # install spark-3.2.1-bin-hadoop3.2
-RUN wget https://dlcdn.apache.org/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
+RUN wget https://dlcdn.apache.org/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz --no-check-certificate && \
     tar -xvf spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz && \
     mv spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION /home/spark && \
     rm -rf spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz
@@ -35,7 +35,7 @@ RUN apt-get install python$PYTHON_VERSION -y && \
     ln -s /usr/bin/python$PYTHON_VERSION /usr/bin/python
 
 # zeppelin-0.10.1
-RUN wget https://dlcdn.apache.org/zeppelin/zeppelin-$ZEPPELIN_VERSION/zeppelin-$ZEPPELIN_VERSION-bin-all.tgz && \
+RUN wget https://dlcdn.apache.org/zeppelin/zeppelin-$ZEPPELIN_VERSION/zeppelin-$ZEPPELIN_VERSION-bin-all.tgz --no-check-certificate && \
     tar -zxf zeppelin-$ZEPPELIN_VERSION-bin-all.tgz && \
     mv zeppelin-$ZEPPELIN_VERSION-bin-all /home/zeppelin && \
     rm -rf zeppelin-$ZEPPELIN_VERSION-bin-all.tgz
@@ -70,9 +70,11 @@ RUN rm -rf /home/zeppelin/bin/*.cmd && \
     rm -rf /home/zeppelin/notebook && \
     mkdir /home/zeppelin/notebook
 
-RUN pip install pyspark
+# pyspark 설치시 self signed certificate in certificate chain error 떄문에... 
+RUN python -m pip install --upgrade pip --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org
+RUN pip3 install pyspark
 
 # 컨테이너 실행시 spark 자동실행
 COPY ./entrypoint.sh /usr/local/bin/
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
